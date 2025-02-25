@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+</head>
+<body>
+  <form id="login-form">
+    <label for="url">URL:</label>
+    <input type="text" id="url" name="url" required><br>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br>
+    <button type="submit" id="save-button" name="save-button">Submit</button>
+  </form>
+  <script>
+    const fs = window.electron.fs;  // Utilisation de l'API 'fs' exposée dans le preload.js
+  
+    console.log(fs);  // Tu peux tester ici pour voir si l'API fonctionne
+
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.invoke('read-file', 'datas.json').then(data => {
+        console.log(data);  // Affiche le contenu du fichier
+    });
+
+  </script>
+</body>
+</html>
