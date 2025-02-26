@@ -1,6 +1,6 @@
 {
   "name": "pronote-desktop",
-  "productName": "pronote-desktop",
+  "productName": "Pronote Desktop",
   "version": "1.0.0",
   "description": "Pronote desktop application",
   "main": "src/index.js",
@@ -10,10 +10,36 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
-    "build:win": "npm run package -- --platform=win32",
-    "build:linux": "npm run package -- --platform=linux",
-    "build:mac": "npm run package -- --platform=darwin",
-    "build": "npm run package --platform=win32 --platform=linux --platform=darwin"
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "fr.naosis.pronote-desktop",
+    "productName": "Pronote Desktop",
+    "mac": {
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.education",
+      "target": {
+        "target": "default",
+        "arch": ["x64", "arm64"]
+      }
+    },
+    "win": {
+      "icon": "assets/icon.ico"
+    },
+    "linux": {
+      "icon": "assets/icon.png"
+    },
+    "files": [
+      "src/**/*",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/",
+        "to": "assets/",
+        "filter": ["**/*"]
+      }
+    ]
   },
   "keywords": [],
   "author": {
@@ -22,7 +48,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-store": "^10.0.1",
+    "localdb": "^0.2.12"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.7.0",
@@ -33,6 +61,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.7.0",
     "@electron-forge/plugin-fuses": "^7.7.0",
     "@electron/fuses": "^1.8.0",
-    "electron": "34.2.0"
+    "electron": "34.2.0",
+    "electron-builder": "^25.1.8"
   }
 }

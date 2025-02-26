@@ -4,27 +4,114 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h2 img {
+      margin-right: 10px;
+      height: 40px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    input {
+      margin-bottom: 10px;
+      margin-top: 5px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #03b503;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #089708;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      margin-top: 20px;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <form id="login-form">
-    <label for="url">URL:</label>
-    <input type="text" id="url" name="url" required><br>
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required><br>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required><br>
-    <button type="submit" id="save-button" name="save-button">Submit</button>
-  </form>
+  <div class="login-container">
+    <h2>
+      <img src="./assets/icon.png" alt="Logo">
+      Pronote Desktop
+    </h2>
+    <form id="login-form">
+      <label for="url">URL pronote:</label>
+      <input type="text" id="url" name="url" placeholder="https://0830058m.index-education.net/pronote/eleve.html" required>
+      <label for="username">Nom D'Utilisateur :</label>
+      <input type="text" id="username" name="username" placeholder="prenom.nom" required>
+      <label for="password">Mot De Passe :</label>
+      <input type="password" id="password" name="password" placeholder="password" required>
+      <button type="submit" id="saveBtn" name="saveBtn">Se connecter</button>
+    </form>
+    <p class="footer-text">Developed by <a href="https://naosis.me/" target="_blank">Naos</a>, not affiliated with Index Education.</p>
+
+  </div>
   <script>
-    const fs = window.electron.fs;  // Utilisation de l'API 'fs' exposée dans le preload.js
+    const form = document.getElementById('login-form');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();  // Prevent page reload
   
-    console.log(fs);  // Tu peux tester ici pour voir si l'API fonctionne
-
-    const { ipcRenderer } = require('electron');
-    ipcRenderer.invoke('read-file', 'datas.json').then(data => {
-        console.log(data);  // Affiche le contenu du fichier
+      const url = document.getElementById('url').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+  
+      // Use the API exposed via the preload script
+      if (window.electron && window.electron.submitLoginData) {
+        window.electron.submitLoginData(url, username, password);
+      } else {
+        console.error('submitLoginData function is not defined');
+      }
     });
-
-  </script>
+  </script>  
 </body>
 </html>
