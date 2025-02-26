@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, Notification } = require('electron');
 const path = require('path');
 const { shell } = require('electron');
 
@@ -16,6 +16,19 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+let mainWindow;
+let loginWindow;
+
+const sendNotification = (title, body) => {
+  const notification = new Notification({
+    title: title,
+    body: body,
+    icon: path.join(__dirname, '/assets/icon.png'),
+  });
+
+  notification.show();
+}
+
 const createMenu = () => {
   const menuTemplate = [
     {
@@ -24,9 +37,11 @@ const createMenu = () => {
         {
           label: 'Se déconnecter',
           click: () => {
-            // Envoyer un message pour se déconnecter
             removeLoginData();
-            BrowserWindow.getAllWindows()[0].close();
+            sendNotification('Déconnexion', 'Vous avez été déconnecté de Pronote.');
+            if (mainWindow) {
+              mainWindow.close();
+            }
             createLoginWindow();
           }
         },
@@ -50,8 +65,8 @@ const createMenu = () => {
               title: 'About',
               autoHideMenuBar: true,
               webPreferences: {
-              nodeIntegration: true,
-              contextIsolation: false,
+                nodeIntegration: true,
+                contextIsolation: false,
               },
             });
 
@@ -62,7 +77,7 @@ const createMenu = () => {
               </head>
               <body>
                 <h1>Pronote APP pour les élèves</h1>
-                <p>Développé par <a href='https://naosis.me/> en electron.</p>
+                <p>Développé par <a href='https://naosis.me'>en electron.</a></p>
                 <button onclick="window.close()">Close</button>
               </body>
               </html>`);
@@ -82,9 +97,8 @@ const createMenu = () => {
   Menu.setApplicationMenu(menu);
 };
 
-// Créer la fenêtre de login
 const createLoginWindow = () => {
-  const loginWindow = new BrowserWindow({
+  loginWindow = new BrowserWindow({
     width: 800,
     height: 600,
     autoHideMenuBar: true,
@@ -97,34 +111,62 @@ const createLoginWindow = () => {
   });
 
   loginWindow.loadFile(path.join(__dirname, 'login.html'));
+
+  loginWindow.on('closed', () => {
+    loginWindow = null;
+  });
 };
 
-
-// Créer la fenêtre principale avec l'URL spécifiée dans datas.json
 const createMainWindow = (url) => {
   console.log('Création de la fenêtre principale avec l\'URL:', url); // Debug : création de la fenêtre principale
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1600,
     height: 900,
     show: false,  // Cacher la fenêtre au démarrage
-    icon: path.join(__dirname, '/assets/icon.ico'),
+    icon: path.join(__dirname, '/assets/icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join('preloadMain.js'),  // Preload pour la fenêtre principale
+      preload: path.join(__dirname, 'preloadMain.js'),  // Preload pour la fenêtre principale
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
+  const mainDomain = new URL(url).hostname;
+  if (!mainDomain.endsWith('index-education.net')) {
+    removeLoginData();
+    sendNotification('Erreur', 'Le site n\'est pas un domaine d\'index-education.net');
+    createLoginWindow();
+    return;
+  }
+
+  // check if the url return an error (other than 200 OK)
+  if (url) {
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      console.log('Error code:', errorCode);
+      console.log('Error description:', errorDescription);
+      console.log('Validated URL:', validatedURL);
+      console.log('Is main frame:', isMainFrame);
+      if (errorCode !== -3) {
+        removeLoginData();
+        sendNotification('Erreur', 'Impossible de charger la page. Veuillez vérifier l\'URL.');
+        createLoginWindow();
+      }
+    });
+  }
+
   mainWindow.loadURL(url);
 
-  const data = getLoginData();
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 
   mainWindow.webContents.on('did-navigate', (event, newUrl) => {
     const domain = new URL(newUrl).hostname;
     console.log('Nouvelle URL:', newUrl);  // Debug : Afficher l'URL après redirection
-  
+
     // Vérifier que les données de login existent
+    const data = getLoginData();
     if (data && data.login && data.password) {
       // Vérifier si le domaine est différent de "index-education.net"
       if (!domain.includes('index-education.net')) {
@@ -161,7 +203,10 @@ const removeLoginData = () => {
 
 ipcMain.on('logout', (event) => {
   removeLoginData();
-  app.quit();
+  if (mainWindow) {
+    mainWindow.close();
+  }
+  createLoginWindow();
 });
 
 // Fonction principale qui démarre l'application
@@ -174,6 +219,7 @@ app.whenReady().then(() => {
       storage = new Store();
       const loginData = getLoginData();
       if (loginData && loginData.url) {
+
         createMainWindow(loginData.url);
       } else {
         createLoginWindow();
@@ -185,12 +231,13 @@ app.whenReady().then(() => {
 // Capter l'événement 'login-data-submitted' du renderer
 ipcMain.on('login-data-submitted', (event, url, login, password) => {
   storage.set('ploginData', { url, login, password });
+  if (loginWindow) {
+    loginWindow.close();
+  }
   createMainWindow(url);
 });
 
 // Quitter l'application si toutes les fenêtres sont fermées
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  app.quit();
 });
