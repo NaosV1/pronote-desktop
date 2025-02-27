@@ -117,6 +117,74 @@ const createLoginWindow = () => {
   });
 };
 
+const v2MainWindow = (url) => {
+  console.log('Création de la fenêtre v2 principale avec l\'URL:', url); // Debug : création de la fenêtre principale
+  mainWindow = new BrowserWindow({
+    width: 1600,
+    height: 900,
+    show: false,  // Cacher la fenêtre au démarrage
+    icon: path.join(__dirname, '/assets/icon.png'),
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, '/v2/preloadV2.js'),  // Preload pour la fenêtre principale
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  const mainDomain = new URL(url).hostname;
+  if (!mainDomain.endsWith('index-education.net')) {
+    removeLoginData();
+    sendNotification('Erreur', 'Le site n\'est pas un domaine d\'index-education.net');
+    createLoginWindow();
+    return;
+  }
+
+  // check if the url return an error (other than 200 OK)
+  if (url) {
+    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      console.log('Error code:', errorCode);
+      console.log('Error description:', errorDescription);
+      console.log('Validated URL:', validatedURL);
+      console.log('Is main frame:', isMainFrame);
+      if (errorCode !== -3) {
+        removeLoginData();
+        sendNotification('Erreur', 'Impossible de charger la page. Veuillez vérifier l\'URL.');
+        createLoginWindow();
+      }
+    });
+  }
+
+  mainWindow.loadURL(url);
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  mainWindow.webContents.on('did-navigate', (event, newUrl) => {
+    const domain = new URL(newUrl).hostname;
+    console.log('Nouvelle URL:', newUrl);  // Debug : Afficher l'URL après redirection
+
+    // Vérifier que les données de login existent
+    const data = getLoginData();
+    if (data && data.login && data.password) {
+      // Vérifier si le domaine est différent de "index-education.net"
+      if (!domain.includes('index-education.net')) {
+        console.log('Le domaine n\'est pas index-education.net. La fenêtre va être cachée.');
+        mainWindow.webContents.executeJavaScript(`document.getElementById("username").value = "${data.login}";`)
+        mainWindow.webContents.executeJavaScript(`document.getElementById("password").value = "${data.password}";`)
+        mainWindow.webContents.executeJavaScript('document.getElementById("submitBtn").click();')
+        // mainWindow.hide();  // Cacher la fenêtre si l'URL n'est pas du domaine souhaité
+      } else {
+        console.log('Le domaine est index-education.net. La fenêtre va être affichée.');
+        mainWindow.show();  // Afficher la fenêtre si l'URL est du domaine souhaité
+      }
+    } else {
+      console.error("Les données de login sont introuvables ou incorrectes.");
+    }
+  });
+};
+
 const createMainWindow = (url) => {
   console.log('Création de la fenêtre principale avec l\'URL:', url); // Debug : création de la fenêtre principale
   mainWindow = new BrowserWindow({
