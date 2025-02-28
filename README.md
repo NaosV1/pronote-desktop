@@ -1,3 +1,5 @@
+![Pronote Desktop](./src/assets/pronotedesktop-banner.png)
+# THIS PROJECT IS **NOT** AFFILIATED WITH INDEX-EDUCATION.
 # Pronote Desktop
 
 PronoteDesktop is a application designed to pronote with ease, no need to log back into your ENT every single time, this application will log you automatically after entering your logins the first time.
