@@ -66,33 +66,6 @@ const createMenu = () => {
       label: 'About',
       submenu: [
         {
-          label: 'About',
-          click: () => {
-            const aboutWindow = new BrowserWindow({
-              width: 400,
-              height: 300,
-              title: 'About',
-              autoHideMenuBar: true,
-              webPreferences: {
-                nodeIntegration: true,
-                contextIsolation: false,
-              },
-            });
-
-            aboutWindow.loadURL(`data:text/html,
-              <html>
-              <head>
-                <title>About</title>
-              </head>
-              <body>
-                <h1>Pronote APP pour les élèves</h1>
-                <p>Développé par <a href='https://naosis.me'>en electron.</a></p>
-                <button onclick="window.close()">Close</button>
-              </body>
-              </html>`);
-          }
-        },
-        {
           label: 'Naos',
           click: () => {
             shell.openExternal('https://naosis.me');
@@ -244,7 +217,7 @@ const createMainWindow = (url) => {
         type: 'info',
         buttons: ['Se déconnecter', 'Quitter l\'application', 'Recharger la page', 'Cancel'],
         title: 'Menu Options',
-        message: 'Choose an option from the menu bar.'
+        message: 'Choisis une option.'
       };
       dialog.showMessageBox(mainWindow, options).then((result) => {
         switch (result.response) {
