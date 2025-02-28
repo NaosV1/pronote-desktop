@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, Notification, dialog } = require('electron');
 const path = require('path');
 const { shell } = require('electron');
 
@@ -49,6 +49,15 @@ const createMenu = () => {
           label: 'Quitter l\'application',
           click: () => {
             app.quit();
+          }
+        },
+        {
+          label: 'Recharger la page',
+          click: () => {
+            if (mainWindow) {
+              sendNotification('Rechargement', 'La page va été rechargée.');
+              mainWindow.reload();
+            }
           }
         }
       ]
@@ -192,7 +201,6 @@ const createMainWindow = (url) => {
     height: 900,
     show: false,  // Cacher la fenêtre au démarrage
     icon: path.join(__dirname, '/assets/icon.png'),
-    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preloadMain.js'),  // Preload pour la fenêtre principale
       nodeIntegration: false,
@@ -228,6 +236,42 @@ const createMainWindow = (url) => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  // when the user press the MAJ key, we will show a little form where the user can choose option in the Menu bar
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F1' && input.shift) {
+      const options = {
+        type: 'info',
+        buttons: ['Se déconnecter', 'Quitter l\'application', 'Recharger la page', 'Cancel'],
+        title: 'Menu Options',
+        message: 'Choose an option from the menu bar.'
+      };
+      dialog.showMessageBox(mainWindow, options).then((result) => {
+        switch (result.response) {
+          case 0:
+            removeLoginData();
+            sendNotification('Déconnexion', 'Vous avez été déconnecté de Pronote.');
+            if (mainWindow) {
+              mainWindow.close();
+            }
+            createLoginWindow();
+            break;
+          case 1:
+            app.quit();
+            break;
+          case 2:
+            if (mainWindow) {
+              sendNotification('Rechargement', 'La page va été rechargée.');
+              mainWindow.reload();
+            }
+            break;
+          default:
+            break;
+        }
+      });
+    }
+  });
+
 
   mainWindow.webContents.on('did-navigate', (event, newUrl) => {
     const domain = new URL(newUrl).hostname;
