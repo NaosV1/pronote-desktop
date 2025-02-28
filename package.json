@@ -1,7 +1,7 @@
 {
   "name": "pronote-desktop",
   "productName": "Pronote Desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pronote desktop application",
   "main": "src/index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "appId": "fr.naosis.pronote-desktop",
     "productName": "Pronote Desktop",
     "mac": {
-      "icon": "assets/icon.icns",
+      "icon": "src/assets/icon.png",
       "category": "public.app-category.education",
       "target": {
         "target": "default",
@@ -27,10 +27,10 @@
       }
     },
     "win": {
-      "icon": "assets/icon.ico"
+      "icon": "src/assets/icon.png"
     },
     "linux": {
-      "icon": "assets/icon.png"
+      "icon": "src/assets/icon.png"
     },
     "files": [
       "src/**/*",
@@ -38,8 +38,8 @@
     ],
     "extraResources": [
       {
-        "from": "assets/",
-        "to": "assets/",
+        "from": "src/assets/",
+        "to": "src/assets/",
         "filter": ["**/*"]
       }
     ]
