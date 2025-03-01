@@ -1,7 +1,7 @@
 {
   "name": "pronote-desktop",
   "productName": "Pronote Desktop",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Pronote desktop application",
   "main": "src/index.js",
   "scripts": {

@@ -7,6 +7,7 @@ PronoteDesktop is a application designed to pronote with ease, no need to log ba
 ## Features
 
 - automatically log you to your account
+- Multiple accounts support
 - Saving times, just having to start the application instead of going to your web browser, going to your ENT, enter your logins and then access your pronote 
 
 ## Download
@@ -16,6 +17,10 @@ Visit the [releases](https://github.com/NaosV1/pronote-desktop/releases) page an
 - [x] MacOS Apple (arm64 .dmg)
 - [x] Linux (.AppImage)
 - [x] Windows (.exe)
+
+## Menus
+
+You can use multiple accounts now by selecting in the menu or using the SHIFT + F1 shortcut.
 
 ## Fork the project
 
